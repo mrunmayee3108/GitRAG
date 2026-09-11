@@ -8,7 +8,7 @@ A high-performance codebase intelligence and Retrieval-Augmented Generation (RAG
 
 **GitRAG** transforms source code repositories and documentation into an AI-ready semantic vector database. Unlike generic text chunkers that blindly slice code and lose structure, GitRAG uses **AST (Abstract Syntax Tree)** parsing to extract meaningful semantic symbols (classes, functions, methods, docstrings, and imports) while maintaining exact line-level references.
 
-Retrieved code chunks are enriched with contextual metadata headers, embedded using dense vector representations, and queried in milliseconds via **FAISS**.
+Retrieved code chunks are enriched with contextual metadata headers, embedded using dense vector representations, and queried in milliseconds via **FAISS**
 
 ---
 
