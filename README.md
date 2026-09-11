@@ -234,7 +234,6 @@ Expected output:
 [INFO] ALL GITRAG INTEGRATION TESTS PASSED SUCCESSFULLY! 
 ```
 
----
 
 ## 🛣️ Roadmap
 
