@@ -33,8 +33,14 @@ GitRAG/
 │   ├── parser.py            # AST parsing, file scanning, and safe ZIP extraction
 │   ├── chunker.py           # Contextual chunking with metadata headers
 │   └── vector_store.py      # FAISS vector store & SentenceTransformer retrieval
+├── rag/
+│   ├── __init__.py          # Citation RAG and code flow exports
+│   ├── citation_rag.py      # Gemini grounded Q&A with exact line citations
+│   └── code_flow.py         # Caller-callee & architectural Mermaid flow generator
+├── app.py                   # Full interactive Streamlit Dashboard
 ├── requirements.txt         # Project dependencies
-├── test_indexer.py          # End-to-end integration test suite
+├── test_indexer.py          # Part 1 end-to-end integration test suite
+├── test_rag.py              # Part 2 RAG & flow integration test suite
 └── README.md                # Documentation
 ```
 
@@ -212,28 +218,31 @@ for rank, match in enumerate(results, start=1):
 
 ## 🧪 Running Tests
 
-GitRAG includes a self-contained test suite that automatically sets up a mock multi-file codebase, tests ZIP extraction, executes AST parsing, performs semantic chunking, and runs FAISS similarity queries:
+### Running the Streamlit Dashboard
 
+Launch the interactive GitRAG dashboard:
+
+```bash
+streamlit run app.py
+```
+
+Then open your browser to `http://localhost:8501`. Enter your Gemini API key in the sidebar, select or upload a repository to index, and start exploring!
+
+---
+
+## 🧪 Running Tests
+
+### Part 1: Indexer Test Suite
 ```bash
 python test_indexer.py
 ```
 
-Expected output:
-```text
-[INFO] STARTING GITRAG CORE ENGINE INTEGRATION TEST SUITE
-[INFO] --> Testing RepositoryParser on directory...
-[INFO] [PASSED] RepositoryParser and AST extraction verification.
-[INFO] --> Testing ZIP archive extraction and parsing...
-[INFO] [PASSED] ZIP archive safe extraction verification.
-[INFO] --> Testing CodeChunker...
-[INFO] [PASSED] CodeChunker metadata and header formatting verification.
-[INFO] --> Testing VectorStore index construction and persistence...
-[INFO] --> Testing loading index from disk...
-[INFO] --> Testing semantic search queries...
-[INFO] [PASSED] FAISS index persistence and semantic query verification.
-[INFO] ALL GITRAG INTEGRATION TESTS PASSED SUCCESSFULLY! 
+### Part 2: RAG & Code Flow Test Suite
+```bash
+python test_rag.py
 ```
 
+---
 
 ## 🛣️ Roadmap
 
@@ -241,8 +250,9 @@ Expected output:
 - [x] Safe ZIP file extraction with ZipSlip defense
 - [x] Contextual metadata header chunking with overlap handling
 - [x] FAISS index generation, persistence, and dense retrieval
-- [ ] Gemini API integration (`google-genai`) for answer generation with code citations
-- [ ] Streamlit web UI for interactive repository upload, indexing, and chat
+- [x] Gemini API integration (`google-genai`) for answer generation with code citations
+- [x] Mermaid.js architectural code flow visualizer
+- [x] Streamlit web UI for interactive repository upload, indexing, chat, and AST inspection
 
 ---
 
