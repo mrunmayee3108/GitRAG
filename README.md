@@ -1,14 +1,14 @@
-# GitRAG 
+# GitRAG ⚡
 
-A high-performance codebase intelligence and Retrieval-Augmented Generation (RAG) engine designed to index, search, and understand software repositories with symbol-level precision and line-number accuracy.
+A high-performance codebase intelligence and Retrieval-Augmented Generation (RAG) engine designed to index, search, and understand software repositories with symbol-level precision, exact line-number citations, and interactive architectural flow diagrams.
 
 ---
 
 ## 🌟 Overview
 
-**GitRAG** transforms source code repositories and documentation into an AI-ready semantic vector database. Unlike generic text chunkers that blindly slice code and lose structure, GitRAG uses **AST (Abstract Syntax Tree)** parsing to extract meaningful semantic symbols (classes, functions, methods, docstrings, and imports) while maintaining exact line-level references.
+**GitRAG** transforms source code repositories and documentation into an AI-ready semantic vector database and interactive intelligence dashboard. Unlike generic text chunkers that blindly slice code and lose structural context, GitRAG uses **AST (Abstract Syntax Tree)** parsing to extract meaningful semantic symbols (classes, functions, methods, docstrings, and imports) while maintaining exact 1-indexed line references.
 
-Retrieved code chunks are enriched with contextual metadata headers, embedded using dense vector representations, and queried in milliseconds via **FAISS**
+Retrieved code chunks are enriched with contextual metadata headers, embedded using dense vector representations via **FAISS**, and synthesized by **Google's Gemini** (`google-genai` SDK) to answer technical questions with exact inline citations and interactive **Mermaid.js** execution flow diagrams.
 
 ---
 
@@ -19,8 +19,15 @@ Retrieved code chunks are enriched with contextual metadata headers, embedded us
 - 🛡️ **Zip-Slip Safe Archive Extraction**: Safely inspects and extracts uploaded `.zip` repositories while preventing path traversal vulnerabilities (`..` escape attacks).
 - 🧩 **Context-Aware Semantic Chunking**: Enriches each chunk with a standardized header (`File: ... (Lines start-end) | Type: ... | Name: ...`) and handles oversized symbols with intelligent sliding-window overlap.
 - ⚡ **FAISS Vector Search**: Builds L2-normalized Inner Product indices (equivalent to Cosine Similarity) for fast, dense semantic retrieval.
-- 💾 **Index Persistence**: Easily serialize (`index.faiss` and `chunks.json`) and reload indices from disk.
-- 🧪 **Self-Contained Test Suite**: Includes comprehensive integration tests (`test_indexer.py`) that validate parsing, chunking, indexing, and retrieval in isolated environments.
+- 🤖 **Grounded Repository QA (Gemini)**: Answers developer questions with strict grounding on retrieved code snippets, preventing hallucinations.
+- 🏷️ **Exact Line-Number Citations**: Automatically cites references inline in the format `[file_path:start-end]` (e.g., `[indexer/parser.py:45-80]`).
+- 🗺️ **Code Flow & Execution Visualizer**: Automatically maps caller-callee sequences and architectural dependencies into interactive **Mermaid.js** flowcharts.
+- 🖥️ **Streamlit UI Dashboard**: Complete 3-tab developer workspace:
+  - **💬 Code Q&A Chat**: Conversational interface with interactive citation badges and expandable code inspector.
+  - **🗺️ Code Flow Visualizer**: Live rendered Mermaid diagrams with pan/zoom and copyable definitions.
+  - **📂 Repository Structure**: Collapsible file hierarchy and symbol browser with full code inspection.
+- 🔐 **Secure Server-Side Configuration**: `GEMINI_API_KEY` is loaded exclusively from the server environment or `.env` file—never exposed in the UI or committed to Git.
+- 🧪 **Self-Contained Test Suites**: Comprehensive end-to-end integration tests (`test_indexer.py` and `test_rag.py`).
 
 ---
 
@@ -41,6 +48,8 @@ GitRAG/
 ├── requirements.txt         # Project dependencies
 ├── test_indexer.py          # Part 1 end-to-end integration test suite
 ├── test_rag.py              # Part 2 RAG & flow integration test suite
+├── .env.example             # Environment variable template
+├── .gitignore               # Security rules (ignores .env, .venv, cache)
 └── README.md                # Documentation
 ```
 
@@ -50,8 +59,9 @@ GitRAG/
 
 ### 1. Prerequisites
 
-- Python 3.9+ recommended
+- Python 3.9+ (Python 3.10 to 3.13 supported)
 - `pip` or virtual environment manager (`venv` / `conda`)
+- A Google Gemini API key ([Google AI Studio](https://aistudio.google.com/))
 
 ### 2. Installation
 
@@ -63,33 +73,73 @@ git clone https://github.com/mrunmayee3108/GitRAG.git
 cd GitRAG
 
 # Create and activate a virtual environment
-python -m venv venv
+python -m venv .venv
 
-# Windows:
-venv\Scripts\activate
+# Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+
+# Windows (Command Prompt):
+.\.venv\Scripts\activate.bat
 
 # Linux / macOS:
-source venv/bin/activate
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Dependencies
+### 3. Configure Gemini API Key
 
-- **`sentence-transformers`**: Generates dense code and query embeddings (`sentence-transformers/all-MiniLM-L6-v2` by default).
-- **`faiss-cpu`**: High-performance vector similarity search.
-- **`numpy`**: Array manipulation for vector normalizations.
-- **`google-genai`**: For Gemini LLM query synthesis and RAG answering.
-- **`streamlit`**: For the interactive web dashboard.
+Copy `.env.example` to `.env` and add your Gemini API key:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+```env
+GEMINI_API_KEY=your_actual_gemini_api_key_here
+```
+
+*(Note: `.env` is ignored by Git and will never be committed).*
 
 ---
 
-## 💡 Quick Start & Usage
+## 🖥️ Running the Streamlit Dashboard
+
+Launch the interactive GitRAG dashboard:
+
+```bash
+streamlit run app.py
+```
+
+Open your browser to:
+```text
+http://localhost:8501
+```
+
+### Dashboard Capabilities:
+1. **Sidebar**:
+   - Select Gemini reasoning model (`gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-1.5-flash`).
+   - Select repository source: **Local Directory** or **Upload ZIP Archive**.
+   - Adjust Top-K retrieved snippets.
+   - Click **"🚀 Index Repository"** to parse AST symbols and build the FAISS index.
+2. **💬 Tab 1 ("Code Q&A Chat")**:
+   - Ask complex architectural and implementation questions.
+   - Click on file/line badge citations.
+   - Expand the **"Retrieved Code Snippets"** viewer to inspect raw code and similarity scores.
+3. **🗺️ Tab 2 ("Code Flow Visualizer")**:
+   - View caller-callee sequence diagrams and data flow rendered via Mermaid.js.
+   - Enter custom flow queries (e.g., *"Trace how user authentication flows into token generation"*).
+4. **📂 Tab 3 ("Repository Structure")**:
+   - Browse the repository module tree.
+   - Filter functions, classes, and methods with line counts and source preview.
+
+---
+
+## 💡 Python API Usage
 
 ### 1. Parse a Repository or ZIP Archive
-
-You can parse any local directory or ZIP archive directly into structured `CodeSymbol` objects:
 
 ```python
 from pathlib import Path
@@ -106,138 +156,139 @@ print(f"Extracted {len(symbols)} code symbols.")
 
 ### 2. Chunk Symbols with Contextual Headers
 
-Chunk symbols into embedding-ready text segments:
-
 ```python
 from indexer import chunk_symbols
 
-# Generates chunks with standardized metadata headers and sliding-window overlap
 chunks = chunk_symbols(
     symbols,
     max_lines_per_chunk=100,
     line_overlap=10,
     max_char_limit=2500
 )
-
-# Example chunk structure:
-# chunks[0]["text"]     -> "File: auth.py (Lines 10-25) | Type: function | Name: verify_token\n\ndef verify_token(..."
-# chunks[0]["metadata"] -> {"file_path": "auth.py", "start_line": 10, "end_line": 25, "symbol_name": "verify_token", ...}
 ```
 
-### 3. Build and Persist the FAISS Index
-
-Encode chunks into dense vectors and persist them to disk:
+### 3. Build & Query the FAISS Vector Store
 
 ```python
-from indexer import build_repo_index
+from indexer import build_repo_index, query_codebase
 
-storage_directory = "storage/faiss_index"
+# Build and persist index
+index = build_repo_index(chunks=chunks, save_dir="storage/faiss_index")
 
-# Builds FAISS index and writes index.faiss and chunks.json
-index = build_repo_index(
+# Retrieve top-k relevant snippets
+retrieved = query_codebase(
+    query="How does JWT token verification work?",
+    index=index,
     chunks=chunks,
-    save_dir=storage_directory,
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+    top_k=5
 )
 ```
 
-### 4. Load Index and Query Codebase
-
-Load an existing index from disk and run natural language or code searches:
+### 4. Grounded Q&A with Exact Line Citations (Gemini)
 
 ```python
-from indexer import load_repo_index, query_codebase
+from rag import answer_repo_query
 
-# Load persisted index & chunk metadata
-index, chunks = load_repo_index(save_dir="storage/faiss_index")
+# Automatically reads GEMINI_API_KEY from environment / .env
+result = answer_repo_query(
+    query="Explain the authentication workflow.",
+    retrieved_chunks=retrieved,
+    model="gemini-2.5-flash"
+)
 
-# Perform semantic search
-query = "How is user token verification handled?"
-results = query_codebase(query=query, index=index, chunks=chunks, top_k=3)
+print("Answer:\n", result["answer"])
+print("Citations:\n", result["citations"])
+```
 
-for rank, match in enumerate(results, start=1):
-    meta = match["metadata"]
-    print(f"\n[Match #{rank}] Score: {match['score']:.4f}")
-    print(f"Symbol: {meta['symbol_name']} ({meta['type']})")
-    print(f"Location: {meta['file_path']} (Lines {meta['start_line']}-{meta['end_line']})")
-    print("-" * 50)
-    print(match["text"][:300] + "...")
+### 5. Trace Code Flow (Mermaid.js)
+
+```python
+from rag import trace_query_flow
+
+# Generate Mermaid.js flowchart
+mermaid_diagram = trace_query_flow(
+    entry_query="Trace authentication and token validation flow",
+    retrieved_chunks=retrieved,
+    model="gemini-2.5-flash"
+)
+
+print(mermaid_diagram)
 ```
 
 ---
 
 ## ⚙️ Core Architecture
 
+```text
+                  +-----------------------+
+                  |  Git Repo / ZIP File  |
+                  +-----------+-----------+
+                              |
+                              v
+                  +-----------------------+
+                  |   RepositoryParser    |
+                  | (AST / Line Splitter) |
+                  +-----------+-----------+
+                              |
+                              v CodeSymbol objects
+                  +-----------------------+
+                  |      CodeChunker      |
+                  |  (Contextual Headers) |
+                  +-----------+-----------+
+                              |
+                              v Formatted chunks
+                  +-----------------------+
+                  |      VectorStore      |
+                  | (SentenceTransformer) |
+                  +-----------+-----------+
+                              |
+                              v Dense Embeddings (384-d)
+                  +-----------------------+
+                  |      FAISS Index      |
+                  |  (Inner Product / IP) |
+                  +-----------+-----------+
+                              |
+            +-----------------+-----------------+
+            |                                   |
+            v                                   v
++-----------------------+           +-----------------------+
+|  Dense Semantic Search|           |    Storage on Disk    |
+| (query_codebase top_k)|           |  index.faiss + chunks |
++-----------+-----------+           +-----------------------+
+            |
+            v Top-K Context Chunks
++-----------------------------------------------+
+|             Google Gemini Engine              |
+|        (Server-Side GEMINI_API_KEY)           |
++-----------------------+-----------------------+
+            |                                   |
+            v                                   v
++-----------------------+           +-----------------------+
+|   Citation RAG Engine |           |  Code Flow Visualizer |
+|  Exact File:Line-Span |           |   Mermaid.js Flowchart|
++-----------+-----------+           +-----------+-----------+
+            |                                   |
+            +-----------------+-----------------+
+                              |
+                              v
+                  +-----------------------+
+                  | Streamlit Dashboard   |
+                  | (Chat, Flow, AST Tree)|
+                  +-----------------------+
 ```
-                 +-----------------------+
-                 |  Git Repo / ZIP File  |
-                 +-----------+-----------+
-                             |
-                             v
-                 +-----------------------+
-                 |   RepositoryParser    |
-                 | (AST / Line Splitter) |
-                 +-----------+-----------+
-                             |
-                             v CodeSymbol objects
-                 +-----------------------+
-                 |      CodeChunker      |
-                 |  (Contextual Headers) |
-                 +-----------+-----------+
-                             |
-                             v Formatted chunks
-                 +-----------------------+
-                 |      VectorStore      |
-                 | (SentenceTransformer) |
-                 +-----------+-----------+
-                             |
-                             v Dense Embeddings (384-d)
-                 +-----------------------+
-                 |      FAISS Index      |
-                 |  (Inner Product / IP) |
-                 +-----------+-----------+
-                             |
-             +---------------+---------------+
-             |                               |
-             v                               v
-    [index.faiss]                    [chunks.json]
-```
-
-### Modules Breakdown
-
-1. **`indexer/parser.py`**:
-   - `RepositoryParser`: Scans directories while ignoring `.git`, `node_modules`, `__pycache__`, virtual environments, etc.
-   - `PythonASTVisitor`: Walks Python AST trees to extract functions, classes, methods, imports, and docstrings with 1-indexed line boundaries.
-   - `safe_extract_zip`: Guards against Zip-Slip path traversal vulnerabilities.
-2. **`indexer/chunker.py`**:
-   - `CodeChunker`: Prepends contextual headers to snippets so embeddings retain file path and symbol identity even when split across multiple windows.
-3. **`indexer/vector_store.py`**:
-   - `VectorStore`: Encapsulates embedding creation with `SentenceTransformer`, index generation via `faiss.IndexFlatIP`, disk serialization, and top-$k$ dense similarity retrieval.
 
 ---
 
 ## 🧪 Running Tests
 
-### Running the Streamlit Dashboard
-
-Launch the interactive GitRAG dashboard:
-
-```bash
-streamlit run app.py
-```
-
-Then open your browser to `http://localhost:8501`. Enter your Gemini API key in the sidebar, select or upload a repository to index, and start exploring!
-
----
-
-## 🧪 Running Tests
-
-### Part 1: Indexer Test Suite
+### Part 1: Indexer Integration Tests
+Tests AST symbol extraction, ZipSlip protection, semantic chunking, and FAISS indexing/retrieval:
 ```bash
 python test_indexer.py
 ```
 
-### Part 2: RAG & Code Flow Test Suite
+### Part 2: RAG & Flow Integration Tests
+Tests prompt formatting, regex citation extraction, Mermaid flowchart generation, deterministic offline fallback, and unconfigured key error handling:
 ```bash
 python test_rag.py
 ```
@@ -253,6 +304,7 @@ python test_rag.py
 - [x] Gemini API integration (`google-genai`) for answer generation with code citations
 - [x] Mermaid.js architectural code flow visualizer
 - [x] Streamlit web UI for interactive repository upload, indexing, chat, and AST inspection
+- [x] Server-side secure `GEMINI_API_KEY` handling with `.env` / `.env.example`
 
 ---
 
