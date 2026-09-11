@@ -1,4 +1,4 @@
-# GitRAG 🔍
+# GitRAG 
 
 A high-performance codebase intelligence and Retrieval-Augmented Generation (RAG) engine designed to index, search, and understand software repositories with symbol-level precision and line-number accuracy.
 
